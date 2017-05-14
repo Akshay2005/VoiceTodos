@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>VoiceTodos</title>
+  <style>
+    [v-cloak] {
+      display: none
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="css/app.css">
+  <!-- additional dependencies -->
+  <link href="css/toastr.css" rel="stylesheet" />
+  <!-- /additional dependencies -->
+</head>
+
+<body>
+
+  <div id="app" @keyup.esc="hideModals($event)" @click="hideModals($event)">
+
+    <header>
+      <div class="logotype">
+        <span class="logotype"></span> VoiceTodos
+      </div>
+    </header>
+
+    <div class="content-wrapper" v-cloak>
+
+      <!-- Project selector -->
+      <div class="projects-selector">
+        <button class="selected-project transparent-button" @click="showProjectMenu=true">
+          {{selectedProject.name}} &#x2304;</button>
+        <div class="project-selector-menu popup-menu" v-if="showProjectMenu">
+          <ul>
+            <li v-for="project in projects" track-by="id" @click="selectProject(project)">{{project.name}}</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Toggle voice command -->
+      <div class="voice-cmd-button" @click="toggleVoiceListening()" :class="{'is-listening': listening}">
+        {{listening ? "Stop" : "Start"}} Voice Command
+      </div>
+
+      <!-- Primary text entry input -->
+      <div class="new-todo-wrapper">
+        <input type="text" v-model="newTodoText" placeholder="New todo..." @keyup.enter="addTodo()" @keyup.esc="newTodoText = '' && hideModals($event)"
+          autofocus>
+      </div>
+
+      <div class="todo-wrapper">
+
+        <!-- Todo table -->
+        <table class="todos-table">
+          <thead>
+            <tr>
+              <th width="35">Done</th>
+              <th>Task</th>
+              <th width="100">Created</th>
+              <th width="50">&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="todo in selectedProject.todos" :class="{editing: todo.editing}">
+              <td class="col-completed">
+                <input type="checkbox" v-model="todo.completed">
+              </td>
+              <td class="col-task" @click="todo.editing = true">
+                <span style="width: 100%" v-if="!todo.editing" :class="{ completed: todo.completed }">{{ todo.text }}</span>
+                <input type="text" v-if="todo.editing" v-model="todo.text" @keyup.enter="todo.editing = false" @keyup.esc="todo.editing = false"
+                  @blur="todo.editing = false" autofocus>
+              </td>
+              <td class="col-created-on">{{ formatDate(todo.createdOn) }}</td>
+              <td class="col-actions">
+                <button class="delete-button transparent-button" @click="deleteTodo(todo)">Delete</button>
+              </td>
+            </tr>
+
+            <tr class="no-todo-items" v-if="selectedProject.todos.length == 0">
+              <td colspan="4">No to-do items. Add some!</td>
+            </tr>
+          </tbody>
+        </table>
+        <!-- /todos-table -->
+
+      </div>
+      <!-- /todo-wrapper -->
+    </div>
+    <!-- /content-wrapper -->
+
+  </div>
+
+  <script src="https://unpkg.com/vue/dist/vue.js"></script>
+  <script src="js/speech.js"></script>
+  <script src="js/models.js"></script>
+  <script src="js/router.js"></script>
+  <script src="js/app.js"></script>
+  <!-- additional dependencies -->
+  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+  <script>
+    toastr.options = {
+      "closeButton": false,
+      "debug": false,
+      "newestOnTop": false,
+      "progressBar": true,
+      "positionClass": "toast-top-center",
+      "preventDuplicates": true,
+      "onclick": null,
+      "showDuration": "300",
+      "hideDuration": "1000",
+      "timeOut": "3000",
+      "extendedTimeOut": "1000",
+      "showEasing": "swing",
+      "hideEasing": "linear",
+      "showMethod": "slideDown",
+      "hideMethod": "slideUp"
+    }
+  </script>
+  <!-- /additional dependencies -->
+</body>
+
+</html>
